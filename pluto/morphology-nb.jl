@@ -121,7 +121,11 @@ begin
 	if isempty(analyses)
 		md""
 	else		
-		strs = ["Lexical tokens:"]
+		strs = [
+		"> ⚠️ flags analyses of lexemes automatically extracted from LSJ, but not yet manually verified",
+		"",
+		"Lexical tokens:"
+		]
 		
 		for pr in analyses
 			txt = pr[1]
@@ -134,10 +138,15 @@ begin
 					replace(lbl, labelre => s"*\1*:\2")
 				end
 				astring = join(alabels,"; **or** ")
-	
-				#for  
+
+				coll_list = map(alist) do a
+					a.lexeme.collection
+				end  |> unique
+				if "lsjx" in coll_list
+					txt = txt * "⚠️"
+				end
 				push!(strs, "- **$(txt)**. $(astring)")
-				#end
+				
 			end
 		end
 		Markdown.parse(join(strs, "\n"))
