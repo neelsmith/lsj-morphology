@@ -77,9 +77,22 @@ ortho = literaryGreek()
 # ╔═╡ 2db30f1b-ac26-46a0-8f7a-593f227d9883
 md"""
 
-!!! note "Loading parsing data"
+!!! note "Loading data"
 
 """
+
+# ╔═╡ 67c1fb1e-25ce-4d41-be6e-842b87fa2776
+begin
+	lemmataDict = Dict()
+	f = "lemmata.cex"
+	map(readlines(f)) do ln
+		cols = split(ln, "|")
+		if length(cols) == 2
+			lemmataDict[cols[1]] = cols[2]
+		end
+	end
+	lemmataDict
+end
 
 # ╔═╡ ba046f01-5e07-4acb-80a4-c609af70f5e2
 src = joinpath(pwd(), "morphology-current.csv")
@@ -120,9 +133,11 @@ begin
 
 	if isempty(analyses)
 		md""
-	else		
+	else
+		fubase = "http://folio2.furman.edu/lsj/?urn=urn:cite2:hmt:lsj.chicago_md:"
 		strs = [
-		"> ⚠️ flags analyses of lexemes automatically extracted from LSJ, but not yet manually verified",
+		"> - ⚠️ flags analyses of lexemes automatically extracted from LSJ, but not yet manually verified",
+		"> - analyses are linked to the corresponding article in the LSJ from folio2.furman.edu",
 		"",
 		"Lexical tokens:"
 		]
@@ -145,7 +160,20 @@ begin
 				if "lsjx" in coll_list
 					txt = txt * "⚠️"
 				end
-				push!(strs, "- **$(txt)**. $(astring)")
+
+				lex_ids = map(alist) do a
+					a.lexeme.objectid
+				end |> unique
+
+				lex_links = map(lex_ids) do l
+					lemma = string("**", lemmataDict[l], "**")
+					string("[", lemma, "](", fubase, l, ")")
+				end
+				
+				lsj = join(lex_links," **or** ")
+				
+				push!(strs, "- **$(txt)**. $(astring)  (*See LSJ: $(lsj)*)")
+				
 				
 			end
 		end
@@ -791,6 +819,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─e93f1124-ed70-11ec-33ef-83f186f96881
 # ╟─3065a2e2-a024-495d-b4ad-ddd4cb7477ba
 # ╟─2db30f1b-ac26-46a0-8f7a-593f227d9883
+# ╟─67c1fb1e-25ce-4d41-be6e-842b87fa2776
 # ╟─ba046f01-5e07-4acb-80a4-c609af70f5e2
 # ╟─1c816066-1cde-44b3-991e-ea163c9fddc0
 # ╟─e3ac34ca-30fe-4464-9bb8-f55b79e8f9e8
