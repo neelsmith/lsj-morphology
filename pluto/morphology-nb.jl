@@ -93,7 +93,12 @@ md"""
 !!! note "Retrieving and displaying query results"
 """
 
+# ╔═╡ 344eb248-dab3-4070-a3f3-a9db485dcd4e
+# Regex grabbing 2 parts of colon-separated label
+labelre = r"(.+):(.+)"
+
 # ╔═╡ 0b8a168d-8943-440d-b756-b22992c6fb35
+"""Tokenize `s`, and analyze all lexical tokens."""
 function analyzethis(s)
 	alltkns = tokenize(s, ortho)
 	lex = filter(t -> t.tokencategory == LexicalToken(), alltkns)
@@ -112,22 +117,31 @@ analyses = analyzethis(txt)
 # ╔═╡ ccca866e-1466-4911-a1a6-976dc65510ec
 begin
 	doit
-	strs = ["Lexical tokens:"]
+
+	if isempty(analyses)
+		md""
+	else		
+		strs = ["Lexical tokens:"]
+		
+		for pr in analyses
+			txt = pr[1]
+			alist = pr[2]
+			if isempty(alist)			
+				push!(strs, "- $(txt). no analyses")
+			else
+				alabels = map(alist) do a
+					lbl = a.form |> greekForm |> label
+					replace(lbl, labelre => s"*\1*:\2")
+				end
+				astring = join(alabels,"; **or** ")
 	
-	for pr in analyses# = analyzethis(txt)
-		txt = pr[1]
-		alist = pr[2]
-		if isempty(alist)			
-			push!(strs, "- $(txt). no analyses")
-		else
-			alabels = map(alist) do a
-				a.form |> greekForm |> label
+				#for  
+				push!(strs, "- **$(txt)**. $(astring)")
+				#end
 			end
-			astring = join(alabels,"; *or* ")
-			push!(strs, "- **$(txt)**. $(astring)")
 		end
+		Markdown.parse(join(strs, "\n"))
 	end
-	Markdown.parse(join(strs, "\n"))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -772,6 +786,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─1c816066-1cde-44b3-991e-ea163c9fddc0
 # ╟─e3ac34ca-30fe-4464-9bb8-f55b79e8f9e8
 # ╟─a6158f26-dd8f-4195-a956-5294e65eb02d
+# ╟─344eb248-dab3-4070-a3f3-a9db485dcd4e
 # ╟─0b8a168d-8943-440d-b756-b22992c6fb35
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
