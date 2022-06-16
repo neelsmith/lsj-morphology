@@ -22,6 +22,7 @@ begin
 	using CSV
 	using DataFrames
 	using PlutoUI
+	using Markdown
 	md"(*Your* `using` *statements are here*)"
 end
 
@@ -38,16 +39,17 @@ md"""
 
 !!! tip "Instructions"
 
-    Type or paste text in the input box, then click the `Analyze` button.  
+    Type or paste text in the input box, then click the `Analyze morphology` button.  
 """
 
 # ╔═╡ 57610a6c-340c-40f4-a563-6b1bbafaf2c0
-md"""
+@bind doit Button("Analyze morphology")
 
-$(@bind doit Button("Analyze"))
+# ╔═╡ 6bd4dc61-b722-4575-a5f1-7cdbaae1856d
+@bind txt  TextField((80,5), placeholder="Enter Greek text here")
 
-$(@bind txt  TextField(default="", placeholder=nothing)) 
-"""
+# ╔═╡ 7f61e1b4-e414-4be1-bc44-a955ebaa3aef
+md"### Analyses"
 
 # ╔═╡ 2db30f1b-ac26-46a0-8f7a-593f227d9883
 md"""
@@ -60,24 +62,46 @@ md"""
 # ╔═╡ 3065a2e2-a024-495d-b4ad-ddd4cb7477ba
 ortho = literaryGreek()
 
-# ╔═╡ 0b8a168d-8943-440d-b756-b22992c6fb35
-function analyzethis(s)
-	tkns = tokenize(s, ortho)
-	filter(t -> t.tokencategory == LexicalToken(), tkns)
-end
-
-# ╔═╡ ccca866e-1466-4911-a1a6-976dc65510ec
-analyses = begin
-	doit
-	analyzethis(txt)
-end
-
 # ╔═╡ ba046f01-5e07-4acb-80a4-c609af70f5e2
 src = joinpath(pwd(), "morphology-current.csv")
 
 # ╔═╡ 1c816066-1cde-44b3-991e-ea163c9fddc0
 parser = isfile(src) ? CSV.File(src) |> DataFrame |> DFParser : nothing
 	
+
+# ╔═╡ 0b8a168d-8943-440d-b756-b22992c6fb35
+function analyzethis(s)
+	alltkns = tokenize(s, ortho)
+	lex = filter(t -> t.tokencategory == LexicalToken(), alltkns)
+
+	results = []
+	for s in  map(t -> t.text, lex)
+		parses = parsetoken(s, parser)
+		push!(results, (s, parses))
+	end
+	results
+end
+
+# ╔═╡ ccca866e-1466-4911-a1a6-976dc65510ec
+begin
+	doit
+	strs = ["Lexical tokens:"]
+	
+	for pr in analyzethis(txt)
+		txt = pr[1]
+		alist = pr[2]
+		if isempty(alist)			
+			push!(strs, "- $(txt). no analyses")
+		else
+			alabels = map(alist) do a
+				a.form |> greekForm |> label
+			end
+			astring = join(alabels,"; *or* ")
+			push!(strs, "- **$(txt)**. $(astring)")
+		end
+	end
+	Markdown.parse(join(strs, "\n"))
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -86,6 +110,7 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CitableParserBuilder = "c834cb9d-35b9-419a-8ff8-ecaeea9e2a2a"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Kanones = "107500f9-53d4-4696-8485-0747242ad8bc"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Orthography = "0b4c9448-09b0-4e78-95ea-3eb3328be36d"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 PolytonicGreek = "72b824a7-2b4a-40fa-944c-ac4f345dc63a"
@@ -707,11 +732,13 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─b0ff2a44-bf8f-4188-a332-5548d3ecc90f
 # ╟─2fcdaf63-34f0-475c-a9dc-e18aa19a8fc4
 # ╟─57610a6c-340c-40f4-a563-6b1bbafaf2c0
-# ╠═ccca866e-1466-4911-a1a6-976dc65510ec
-# ╠═0b8a168d-8943-440d-b756-b22992c6fb35
+# ╟─6bd4dc61-b722-4575-a5f1-7cdbaae1856d
+# ╟─7f61e1b4-e414-4be1-bc44-a955ebaa3aef
+# ╟─ccca866e-1466-4911-a1a6-976dc65510ec
 # ╟─2db30f1b-ac26-46a0-8f7a-593f227d9883
+# ╟─0b8a168d-8943-440d-b756-b22992c6fb35
 # ╟─e93f1124-ed70-11ec-33ef-83f186f96881
-# ╠═3065a2e2-a024-495d-b4ad-ddd4cb7477ba
+# ╟─3065a2e2-a024-495d-b4ad-ddd4cb7477ba
 # ╟─ba046f01-5e07-4acb-80a4-c609af70f5e2
 # ╟─1c816066-1cde-44b3-991e-ea163c9fddc0
 # ╟─00000000-0000-0000-0000-000000000001
