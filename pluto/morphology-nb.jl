@@ -30,8 +30,7 @@ end
 md"""
 # Interactive morphology
 
-
-Data quarried from Liddell-Scott using `LSJMining.jl`, and analyzed with `Kanones.jl`.
+Analyze text in standard literary Greek orthography using morphological data quarried from Liddell-Scott by `LSJMining.jl`, and analyzed with `Kanones.jl`.
 """
 
 # ╔═╡ 2fcdaf63-34f0-475c-a9dc-e18aa19a8fc4
@@ -48,19 +47,42 @@ md"""
 # ╔═╡ 6bd4dc61-b722-4575-a5f1-7cdbaae1856d
 @bind txt  TextField((80,5), placeholder="Enter Greek text here")
 
-# ╔═╡ 7f61e1b4-e414-4be1-bc44-a955ebaa3aef
-md"### Analyses"
+# ╔═╡ 45b32d1c-db15-4c91-9c6f-8cb6f56ad237
+html"""
+
+<br/>
+<br/>
+<br/>
+<br/>
+<hr/><hr/>
+"""
+
+# ╔═╡ b45dda25-9a81-4ab2-9813-0de90995a508
+md"""
+
+!!! note "Cells implementing parsing"
+
+
+    You can safely ignore the following cells which retrieve the necessary Julia packages, and load the parsing data you should have previously download from [this url](https://www.homermultitext.org/morphology/morphology-current.csv).  (See the [instructions for running this notebook in the README](https://github.com/neelsmith/lsj-morphology) of this notebook's github repository.)
+
+"""
+
+# ╔═╡ b7eb70fd-a10b-4198-8edd-02e7f078b9c3
+md"""
+
+!!! note "Packages and configuration"
+
+"""
+
+# ╔═╡ 3065a2e2-a024-495d-b4ad-ddd4cb7477ba
+ortho = literaryGreek()
 
 # ╔═╡ 2db30f1b-ac26-46a0-8f7a-593f227d9883
 md"""
 
 !!! note "Loading and formatting data"
 
-    You can safely ignore the following cells.
 """
-
-# ╔═╡ 3065a2e2-a024-495d-b4ad-ddd4cb7477ba
-ortho = literaryGreek()
 
 # ╔═╡ ba046f01-5e07-4acb-80a4-c609af70f5e2
 src = joinpath(pwd(), "morphology-current.csv")
@@ -82,25 +104,37 @@ function analyzethis(s)
 	results
 end
 
+# ╔═╡ b8217135-e0bf-480a-8c64-6de824ee8380
+analyses = begin
+	doit
+	analyzethis(txt)
+end
+
 # ╔═╡ ccca866e-1466-4911-a1a6-976dc65510ec
 begin
 	doit
-	strs = ["Lexical tokens:"]
-	
-	for pr in analyzethis(txt)
-		txt = pr[1]
-		alist = pr[2]
-		if isempty(alist)			
-			push!(strs, "- $(txt). no analyses")
-		else
-			alabels = map(alist) do a
-				a.form |> greekForm |> label
+	if isempty(analyses)
+		md""
+	else
+		labelre = r"(.+):(.+)"
+		strs = ["---", "## Analyses", "", "Lexical tokens:"]
+		
+		for pr in analyses #analyzethis(txt)
+			reading = pr[1]
+			alist = pr[2]
+			if isempty(alist)			
+				push!(strs, "- $(reading). no analyses")
+			else
+				alabels = map(alist) do a
+					lbl = a.form |> greekForm |> label
+					replace(lbl, labelre => s"*\1*: \2")
+				end
+				astring = join(alabels,"; *or* ")
+				push!(strs, "- **$(reading)**. $(astring)")
 			end
-			astring = join(alabels,"; *or* ")
-			push!(strs, "- **$(txt)**. $(astring)")
 		end
-	end
 	Markdown.parse(join(strs, "\n"))
+	end
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -129,7 +163,7 @@ PolytonicGreek = "~0.17.19"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0"
+julia_version = "1.7.2"
 manifest_format = "2.0"
 
 [[deps.ANSIColoredPrinters]]
@@ -733,13 +767,16 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─2fcdaf63-34f0-475c-a9dc-e18aa19a8fc4
 # ╟─57610a6c-340c-40f4-a563-6b1bbafaf2c0
 # ╟─6bd4dc61-b722-4575-a5f1-7cdbaae1856d
-# ╟─7f61e1b4-e414-4be1-bc44-a955ebaa3aef
 # ╟─ccca866e-1466-4911-a1a6-976dc65510ec
-# ╟─2db30f1b-ac26-46a0-8f7a-593f227d9883
-# ╟─0b8a168d-8943-440d-b756-b22992c6fb35
+# ╟─45b32d1c-db15-4c91-9c6f-8cb6f56ad237
+# ╟─b45dda25-9a81-4ab2-9813-0de90995a508
+# ╟─b7eb70fd-a10b-4198-8edd-02e7f078b9c3
 # ╟─e93f1124-ed70-11ec-33ef-83f186f96881
 # ╟─3065a2e2-a024-495d-b4ad-ddd4cb7477ba
+# ╟─2db30f1b-ac26-46a0-8f7a-593f227d9883
 # ╟─ba046f01-5e07-4acb-80a4-c609af70f5e2
 # ╟─1c816066-1cde-44b3-991e-ea163c9fddc0
+# ╟─0b8a168d-8943-440d-b756-b22992c6fb35
+# ╟─b8217135-e0bf-480a-8c64-6de824ee8380
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
