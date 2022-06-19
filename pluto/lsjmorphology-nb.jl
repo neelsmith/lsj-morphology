@@ -135,49 +135,17 @@ begin
 
 	if isempty(analyses)
 		md""
+		
 	else
-		fubase = "http://folio2.furman.edu/lsj/?urn=urn:cite2:hmt:lsj.chicago_md:"
 		strs = [
 		"> - ⚠️ flags analyses of lexemes automatically extracted from LSJ, but not yet manually verified",
-		"> - analyses are linked to the corresponding article in the LSJ from folio2.furman.edu",
+		"> - analyses are linked to the corresponding article in the [LSJ from Furman University](http://folio2.furman.edu/lsj/)",
 		"",
 		"Lexical tokens:"
 		]
-		
-		for pr in analyses
-			txt = pr[1]
-			alist = pr[2]
-			if isempty(alist)			
-				push!(strs, "- $(txt). no analyses")
-			else
-				alabels = map(alist) do a
-					lbl = a.form |> greekForm |> label
-					replace(lbl, labelre => s"*\1*:\2")
-				end
-				astring = join(alabels,"; **or** ")
 
-				coll_list = map(alist) do a
-					a.lexeme.collection
-				end  |> unique
-				if "lsjx" in coll_list
-					txt = txt * "⚠️"
-				end
-
-				lex_ids = map(alist) do a
-					a.lexeme.objectid
-				end |> unique
-
-				lex_links = map(lex_ids) do l
-					lemma = string("**", lemmataDict[l], "**")
-					string("[", lemma, "](", fubase, l, ")")
-				end
-				
-				lsj = join(lex_links," **or** ")
-				
-				push!(strs, "- **$(txt)**. $(astring)  (*See LSJ: $(lsj)*)")
-				
-				
-			end
+		for a in analyses
+			push!(strs, Kanones.md_analysis(a[1], a[2], registry = lemmataDict))
 		end
 		Markdown.parse(join(strs, "\n"))
 	end
