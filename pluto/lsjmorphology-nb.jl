@@ -15,6 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ e93f1124-ed70-11ec-33ef-83f186f96881
+# ╠═╡ show_logs = false
 begin
 	using CitableParserBuilder
 	using Kanones
@@ -98,6 +99,7 @@ end
 src = joinpath(pwd(), "morphology-current.csv")
 
 # ╔═╡ 1c816066-1cde-44b3-991e-ea163c9fddc0
+# ╠═╡ show_logs = false
 parser = isfile(src) ? CSV.File(src) |> DataFrame |> DFParser : nothing
 	
 
@@ -116,7 +118,7 @@ function analyzethis(s)
 	alltkns = tokenize(s, ortho)
 	lex = filter(t -> t.tokencategory == LexicalToken(), alltkns)
 
-	results = []
+	results = Tuple{String, Vector{Analysis}}[]
 	for s in  map(t -> t.text, lex)
 		parses = parsetoken(s, parser)
 		push!(results, (s, parses))
@@ -197,7 +199,7 @@ PolytonicGreek = "72b824a7-2b4a-40fa-944c-ac4f345dc63a"
 CSV = "~0.9.11"
 CitableParserBuilder = "~0.21.4"
 DataFrames = "~1.3.4"
-Kanones = "~0.15.0"
+Kanones = "~0.16.0"
 Orthography = "~0.16.4"
 PlutoUI = "~0.7.39"
 PolytonicGreek = "~0.17.19"
@@ -501,10 +503,10 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.3"
 
 [[deps.Kanones]]
-deps = ["AtticGreek", "BenchmarkTools", "CSV", "CitableBase", "CitableCorpus", "CitableObject", "CitableParserBuilder", "CitableText", "Compat", "DataFrames", "DelimitedFiles", "DocStringExtensions", "Documenter", "Glob", "HTTP", "Orthography", "PolytonicGreek", "Query", "SplitApplyCombine", "Test", "TestSetExtensions", "Unicode"]
-git-tree-sha1 = "26bd4d1b60963de268074beb20cac050482679fb"
+deps = ["AtticGreek", "BenchmarkTools", "CSV", "CitableBase", "CitableCorpus", "CitableObject", "CitableParserBuilder", "CitableText", "Compat", "DataFrames", "DelimitedFiles", "DocStringExtensions", "Documenter", "Downloads", "Glob", "HTTP", "Orthography", "PolytonicGreek", "Query", "SplitApplyCombine", "Test", "TestSetExtensions", "Unicode"]
+git-tree-sha1 = "e8f79c0f96561981f87dc09cd4285477ffec14db"
 uuid = "107500f9-53d4-4696-8485-0747242ad8bc"
-version = "0.15.0"
+version = "0.16.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
