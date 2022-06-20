@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.8
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -98,6 +98,7 @@ end
 src = joinpath(pwd(), "morphology-current.csv")
 
 # ╔═╡ 1c816066-1cde-44b3-991e-ea163c9fddc0
+# ╠═╡ show_logs = false
 parser = isfile(src) ? CSV.File(src) |> DataFrame |> DFParser : nothing
 	
 
@@ -207,7 +208,7 @@ PolytonicGreek = "~0.17.19"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0"
+julia_version = "1.7.2"
 manifest_format = "2.0"
 
 [[deps.ANSIColoredPrinters]]
