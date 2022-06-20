@@ -15,6 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ e93f1124-ed70-11ec-33ef-83f186f96881
+# ╠═╡ show_logs = false
 begin
 	using CitableParserBuilder
 	using Kanones
@@ -117,7 +118,7 @@ function analyzethis(s)
 	alltkns = tokenize(s, ortho)
 	lex = filter(t -> t.tokencategory == LexicalToken(), alltkns)
 
-	results = []
+	results = Tuple{String, Vector{Analysis}}[]
 	for s in  map(t -> t.text, lex)
 		parses = parsetoken(s, parser)
 		push!(results, (s, parses))
@@ -134,49 +135,17 @@ begin
 
 	if isempty(analyses)
 		md""
+		
 	else
-		fubase = "http://folio2.furman.edu/lsj/?urn=urn:cite2:hmt:lsj.chicago_md:"
 		strs = [
 		"> - ⚠️ flags analyses of lexemes automatically extracted from LSJ, but not yet manually verified",
-		"> - analyses are linked to the corresponding article in the LSJ from folio2.furman.edu",
+		"> - analyses are linked to the corresponding article in the [LSJ from Furman University](http://folio2.furman.edu/lsj/)",
 		"",
 		"Lexical tokens:"
 		]
-		
-		for pr in analyses
-			txt = pr[1]
-			alist = pr[2]
-			if isempty(alist)			
-				push!(strs, "- $(txt). no analyses")
-			else
-				alabels = map(alist) do a
-					lbl = a.form |> greekForm |> label
-					replace(lbl, labelre => s"*\1*:\2")
-				end
-				astring = join(alabels,"; **or** ")
 
-				coll_list = map(alist) do a
-					a.lexeme.collection
-				end  |> unique
-				if "lsjx" in coll_list
-					txt = txt * "⚠️"
-				end
-
-				lex_ids = map(alist) do a
-					a.lexeme.objectid
-				end |> unique
-
-				lex_links = map(lex_ids) do l
-					lemma = string("**", lemmataDict[l], "**")
-					string("[", lemma, "](", fubase, l, ")")
-				end
-				
-				lsj = join(lex_links," **or** ")
-				
-				push!(strs, "- **$(txt)**. $(astring)  (*See LSJ: $(lsj)*)")
-				
-				
-			end
+		for a in analyses
+			push!(strs, Kanones.md_analysis(a[1], a[2], registry = lemmataDict))
 		end
 		Markdown.parse(join(strs, "\n"))
 	end
@@ -198,7 +167,7 @@ PolytonicGreek = "72b824a7-2b4a-40fa-944c-ac4f345dc63a"
 CSV = "~0.9.11"
 CitableParserBuilder = "~0.21.4"
 DataFrames = "~1.3.4"
-Kanones = "~0.15.0"
+Kanones = "~0.16.0"
 Orthography = "~0.16.4"
 PlutoUI = "~0.7.39"
 PolytonicGreek = "~0.17.19"
@@ -502,10 +471,10 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.3"
 
 [[deps.Kanones]]
-deps = ["AtticGreek", "BenchmarkTools", "CSV", "CitableBase", "CitableCorpus", "CitableObject", "CitableParserBuilder", "CitableText", "Compat", "DataFrames", "DelimitedFiles", "DocStringExtensions", "Documenter", "Glob", "HTTP", "Orthography", "PolytonicGreek", "Query", "SplitApplyCombine", "Test", "TestSetExtensions", "Unicode"]
-git-tree-sha1 = "26bd4d1b60963de268074beb20cac050482679fb"
+deps = ["AtticGreek", "BenchmarkTools", "CSV", "CitableBase", "CitableCorpus", "CitableObject", "CitableParserBuilder", "CitableText", "Compat", "DataFrames", "DelimitedFiles", "DocStringExtensions", "Documenter", "Downloads", "Glob", "HTTP", "Orthography", "PolytonicGreek", "Query", "SplitApplyCombine", "Test", "TestSetExtensions", "Unicode"]
+git-tree-sha1 = "e8f79c0f96561981f87dc09cd4285477ffec14db"
 uuid = "107500f9-53d4-4696-8485-0747242ad8bc"
-version = "0.15.0"
+version = "0.16.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
